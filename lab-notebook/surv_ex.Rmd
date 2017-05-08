@@ -1,3 +1,39 @@
+---
+title: "Example survival analysis using broom, rms and survminer"
+author: "By: Vijay Ivaturi, `@vijay_ivaturi`, vivaturi at rx dot umaryland dot edu"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:  
+  html_document:
+    code_folding: show
+    highlight: haddock
+    keep_md: yes
+    number_sections: yes
+    theme: readable
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+      toc_depth: 3
+---
+
+```{r set-global-options, echo = FALSE}
+knitr::opts_chunk$set(eval = TRUE, 
+                      warning = FALSE,
+                      echo = TRUE, 
+                      cache = FALSE,
+                      include = TRUE,
+                      collapse = FALSE,
+                      dependson = NULL,
+                      engine = "R", # Chunks will always have R code, unless noted
+                      error = TRUE,
+                      fig.path="Figures/",  # Set the figure options
+                      fig.align = "center", 
+                      fig.width = 7,
+                      fig.height = 7)
+```
+
+
+
 # Setting up example dataset
 
 ```{r}
@@ -44,11 +80,11 @@ survival.fit <- survfit(Surv(dtime,status) ~ 1, data = plb)
 
 
 ```{r}
-tidy(survival.fit)
+tidy(survival.fit) %>% knitr::kable()
 ```
 
 ```{r}
-glance(survival.fit)
+glance(survival.fit)%>% knitr::kable()
 ```
 
 
