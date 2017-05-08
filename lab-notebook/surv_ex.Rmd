@@ -1,0 +1,126 @@
+# Setting up example dataset
+
+```{r}
+library(rms)
+library(Hmisc)
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(tableone)
+library(survminer)
+library(broom)
+rep_na <- function(x){
+  ifelse(is.na(x), -99, x)
+}
+```
+
+```{r}
+#loading the prostate dataset from the rms book
+#load(url('http://biostat.mc.vanderbilt.edu/wiki/pub/Main/DataSets/prostate.sav'))
+#write.csv(prostate,"../data/derived/prostate.csv", row.names = FALSE)
+df <- read.csv("../data/pr.csv", header = TRUE)
+```
+
+Data summary
+
+```{r}
+d <- describe(df[2:17])
+html(d)
+```
+
+
+creating a placebo data
+
+```{r}
+plb <- df %>% filter(rx==0) %>% mutate(stage = ifelse(stage==3,0,1))
+
+```
+
+
+```{r}
+survival.fit <- survfit(Surv(dtime,status) ~ 1, data = plb)
+```
+
+
+```{r}
+tidy(survival.fit)
+```
+
+```{r}
+glance(survival.fit)
+```
+
+
+```{r}
+p1 <- ggsurvplot(survival.fit,  size = 1,  # change line size
+           #linetype="strata",
+           #palette = c("#000000", "#444444", "#5D5D5D", "#707070", "#808080"),
+           #palette = c("#000000", "#707070"), # custom color palettes
+           #conf.int = TRUE, # Add confidence interval
+           #pval = TRUE, # Add p-value
+           #pval.coord = c(30, 0.1),
+           risk.table = TRUE, # Add risk table
+           break.time.by = 10,
+           risk.table.col = "strata", # Risk table color by groups
+           legend.title = "Event Type",
+           ylab = "Survival probability",
+           xlab = "Time (Days)",
+           font.legend = c(12,"bold", "black"),
+           font.tickslab = c(14,"bold","black"),
+           font.x = c(16,"bold","black"),
+           font.y = c(16,"bold","black"),
+           risk.table.fontsize = c(4.5),
+           risk.table.height = 0.3, # Useful to change when you have multiple groups
+           ggtheme = theme_bw() # Change ggplot2 theme
+           )
+p1
+```
+
+
+
+```{r}
+survival.fit <- survfit(Surv(dtime,status) ~ pf, data = plb)
+```
+
+
+```{r}
+p2 <- ggsurvplot(survival.fit,  size = 1,  # change line size
+           #linetype="strata",
+           #palette = c("#000000", "#444444", "#5D5D5D", "#707070", "#808080"),
+           #palette = c("#000000", "#707070"), # custom color palettes
+           #conf.int = TRUE, # Add confidence interval
+           #pval = TRUE, # Add p-value
+           #pval.coord = c(30, 0.1),
+           risk.table = TRUE, # Add risk table
+           break.time.by = 10,
+           risk.table.col = "strata", # Risk table color by groups
+           legend.title = "Event Type",
+           ylab = "Survival probability",
+           xlab = "Time (Days)",
+           font.legend = c(12,"bold", "black"),
+           font.tickslab = c(14,"bold","black"),
+           font.x = c(16,"bold","black"),
+           font.y = c(16,"bold","black"),
+           risk.table.fontsize = c(4.5),
+           risk.table.height = 0.3, # Useful to change when you have multiple groups
+           ggtheme = theme_bw() # Change ggplot2 theme
+           )
+p2
+```
+
+using rms
+
+```{r}
+dd <- datadist(df);
+options(datadist = "dd")
+S <- Surv(df$dtime,df$status)
+f <- cph(S~stage+rx+age+sbp+dbp,data=df, method="breslow")
+s <- summary(f, age=c(50,80))
+html(s, digits = 2)
+```
+
+```{r}
+plot(s, cex=2, nint=5, col.points=rgb(red=.8,green=.1,blue=.1,alpha=1))
+```
+
